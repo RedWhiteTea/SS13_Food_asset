@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>SS13 速查手册 - 治疗方式搜索</title>
+<link rel="stylesheet" href="../css/styles.css">
+<style>
+.main-btn-brute{background:#f44336;border-color:#b71c1c;color:#fff!important;height:100px!important}
+.main-btn-brute:active{background:#b71c1c}
+.main-btn-burn{background:#ff9800;border-color:#e65100;color:#fff!important;height:100px!important}
+.main-btn-burn:active{background:#e65100}
+.main-btn-tox{background:#4caf50;border-color:#1b5e20;color:#fff!important;height:100px!important}
+.main-btn-tox:active{background:#1b5e20}
+.main-btn-oxy{background:#2196f3;border-color:#0d47a1;color:#fff!important;height:100px!important}
+.main-btn-oxy:active{background:#0d47a1}
+.main-btn-x{font-size:32px!important;width:80%!important}
+.main-buttons{gap:8px!important;padding:16px 0 10px!important}
+.dropdown-group{width:80%;margin:0 auto}
+.dropdown-btn{width:100%!important;margin-bottom:0!important}
+.dropdown-btn:hover{transform:none!important;box-shadow:6px 6px 0 rgba(0,0,0,.15)!important}
+.dropdown-panel{width:100%;background:var(--bg2);border:3px solid var(--ink);border-top:none;border-radius:0;box-shadow:4px 4px 0 rgba(0,0,0,.15);max-height:0;overflow:hidden;transition:max-height .3s ease;padding:0 12px}
+.dropdown-panel.open{max-height:300px;overflow-y:auto;padding:10px 12px}
+.dropdown-panel .chem-item{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--rule);font-size:13px}
+.dropdown-panel .chem-item:last-child{border-bottom:none}
+.dropdown-panel .chem-dot{width:10px;height:10px;border:2px solid var(--ink);flex-shrink:0}
+.dropdown-empty{text-align:center;color:var(--muted);font-size:12px;padding:8px 0}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-logo"><span>治疗方式搜索</span></div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="location.href='Medical.html'" title="返回"><img src="../Icons/Misc/Return_btn.PNG" alt="返回" class="nav-btn-icon"></button>
+  </div>
+</nav>
+
+<div class="main-buttons compact">
+  <div class="dropdown-group">
+    <button class="main-btn main-btn-brute main-btn-x dropdown-btn" onclick="toggleDropdown('panelBrute')"><span>体表伤 🩸</span></button>
+    <div class="dropdown-panel" id="panelBrute"></div>
+  </div>
+  <div class="dropdown-group">
+    <button class="main-btn main-btn-burn main-btn-x dropdown-btn" onclick="toggleDropdown('panelBurn')"><span>烧伤 🔥</span></button>
+    <div class="dropdown-panel" id="panelBurn"></div>
+  </div>
+  <div class="dropdown-group">
+    <button class="main-btn main-btn-tox main-btn-x dropdown-btn" onclick="toggleDropdown('panelTox')"><span>中毒 ☠️</span></button>
+    <div class="dropdown-panel" id="panelTox"></div>
+  </div>
+  <div class="dropdown-group">
+    <button class="main-btn main-btn-oxy main-btn-x dropdown-btn" onclick="toggleDropdown('panelOxy')"><span>缺氧 🫁</span></button>
+    <div class="dropdown-panel" id="panelOxy"></div>
+  </div>
+</div>
+
+<script src="temp_chemistry.js"></script>
+<script>
+(function(){
+var types={
+  panelBrute:'治体表伤',panelBurn:'治烧伤',
+  panelTox:'治中毒',panelOxy:'治缺氧'
+};
+
+function getMeds(type){
+  return CHEMICALS.filter(function(ch){
+    return (ch.effects||[]).some(function(fx){return fx.indexOf(type)!==-1;});
+  }).sort(function(a,b){
+    var ca=a.cat==='med'?0:a.cat==='med2'?1:2;
+    var cb=b.cat==='med'?0:b.cat==='med2'?1:2;
+    return ca-cb||a.n.localeCompare(b.n);
+  });
+}
+
+// Pre-render all panels
+for(var id in types){
+  var meds=getMeds(types[id]);
+  var h='';
+  if(meds.length===0){
+    h='<div class="dropdown-empty">暂无对应药品</div>';
+  }else{
+    meds.forEach(function(ch){
+      h+='<div class="chem-item"><span class="chem-dot" style="background:'+(ch.color||'#fff')+'"></span>'+ch.n+'</div>';
+    });
+  }
+  document.getElementById(id).innerHTML=h;
+}
+
+window.toggleDropdown=function(id){
+  var panel=document.getElementById(id);
+  var wasOpen=panel.classList.contains('open');
+  document.querySelectorAll('.dropdown-panel').forEach(function(p){p.classList.remove('open');});
+  if(!wasOpen) panel.classList.add('open');
+};
+})();
+</script>
+</body>
+</html>

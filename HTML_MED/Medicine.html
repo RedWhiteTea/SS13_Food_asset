@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>SS13 速查手册 - 药品搜索</title>
+<link rel="stylesheet" href="../css/styles.css">
+<style>
+.tag{border-radius:0!important;border:3px solid var(--ink)!important;box-shadow:3px 3px 0 rgba(0,0,0,.15)!important;font-weight:700!important;font-size:12px!important;padding:4px 10px!important}
+.tag.active{border-color:var(--accent)!important;background:var(--accent)!important;color:#fff!important}
+.sort-btn{border-radius:0!important;border:3px solid var(--ink)!important;box-shadow:3px 3px 0 rgba(0,0,0,.15)!important;font-weight:700!important;font-size:12px!important;padding:6px 14px!important}
+.sort-btn.active{background:var(--accent3)!important;border-color:var(--accent3)!important;color:#fff!important}
+.search-bar{border-radius:0!important;border:3px solid var(--ink)!important;box-shadow:3px 3px 0 rgba(0,0,0,.15)!important}
+.chem-card{border-radius:0!important;border:3px solid var(--ink)!important;box-shadow:4px 4px 0 rgba(0,0,0,.15)!important;background:var(--bg2)!important;padding:16px!important;margin-bottom:10px!important;cursor:pointer!important}
+.chem-card:hover{transform:translate(2px,2px)!important;box-shadow:2px 2px 0 rgba(0,0,0,.2)!important}
+.chem-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.chem-name{font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px}
+.chem-name .name-en{color:var(--muted);font-size:12px;font-weight:400}
+.chem-color-dot{width:14px;height:14px;border-radius:0;border:2px solid var(--ink);flex-shrink:0;display:inline-block}
+.badge{display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:0;font-size:11px;font-weight:600;border:2px solid var(--ink);background:var(--bg);color:var(--ink)}
+.badge-cat-med{background:#e8f5e9;border-color:#4caf50;color:#2e7d32}
+.badge-cat-med2{background:#e3f2fd;border-color:#42a5f5;color:#1565c0}
+.badge-cat-tox{background:#ffebee;border-color:#f44336;color:#c62828}
+.badge-cat-pyro{background:#fff3e0;border-color:#ff9800;color:#e65100}
+.badge-cat-drug{background:#f3e5f5;border-color:#ab47bc;color:#7b1fa2}
+.badge-cat-food{background:#e3f2fd;border-color:#42a5f5;color:#0d47a1}
+.badge-cat-gas{background:#eceff1;border-color:#78909c;color:#37474f}
+.badge-cat-base{background:#eceff1;border-color:#607d8b;color:#455a64}
+.badge-cat-react{background:#ede7f6;border-color:#7e57c2;color:#4527a0}
+.badge-cat-fert{background:#e8f5e9;border-color:#66bb6a;color:#2e7d32}
+.badge-cat-mater{background:#efebe9;border-color:#8d6e63;color:#4e342e}
+.badge-cat-bio{background:#f3e5f5;border-color:#ab47bc;color:#6a1b9a}
+.badge-cat-other{background:#f5f5f5;border-color:#9e9e9e;color:#616161}
+.badge-effect{background:rgba(46,125,50,.15);border-color:#4caf50;color:#2e7d32}
+.badge-danger{background:rgba(229,57,53,.15);border-color:#e53935;color:#c62828}
+.badge-recipe{background:rgba(123,31,162,.15);border-color:#7b1fa2;color:#6a1b9a}
+.chem-info{font-size:12px;color:var(--muted);margin-bottom:6px}
+.chem-info span{margin-right:12px}
+.chem-info b{color:var(--ink)}
+.chem-desc{font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.5}
+.chem-detail{display:none;margin-top:12px;padding-top:12px;border-top:2px solid var(--ink)}
+.chem-card.expanded .chem-detail{display:block}
+.detail-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:13px}
+.detail-label{font-weight:600;color:var(--muted);min-width:70px;flex-shrink:0}
+.detail-value{color:var(--ink);flex:1}
+.detail-value .reagent-amount{color:var(--accent3);font-weight:600}
+.expand-indicator{font-size:14px;color:var(--muted);transition:transform .2s}
+.chem-card.expanded .expand-indicator{transform:rotate(180deg)}
+.recipe-block{background:var(--bg);border-radius:0;padding:10px;margin-top:6px;border:2px solid var(--ink)}
+.recipe-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px}
+.recipe-arrow{color:var(--muted)}
+.recipe-temp{font-size:11px;color:var(--accent3);padding:2px 8px;background:rgba(255,143,0,.15);border:2px solid var(--accent3);display:inline-block;margin:2px}
+.recipe-ph{font-size:11px;color:#7b1fa2;padding:2px 8px;background:rgba(123,31,162,.15);border:2px solid #7b1fa2;display:inline-block;margin:2px}
+.recipe-note{font-size:11px;color:var(--accent2);padding:4px 8px;background:rgba(229,57,53,.15);border:2px solid var(--accent2);margin-top:4px}
+.section-header{cursor:pointer;user-select:none}
+.section-header .section-toggle{font-size:12px;margin-left:4px;transition:transform .2s ease;display:inline-block}
+.ingredient-section.collapsed .tag-container{display:none!important}
+.ingredient-section.collapsed .section-header .section-toggle{transform:rotate(-90deg)}
+.reset-btn{border-radius:0!important;border:3px solid var(--ink)!important;box-shadow:3px 3px 0 rgba(0,0,0,.15)!important;font-weight:700!important;font-size:14px!important;padding:8px 20px!important;background:var(--accent2)!important;color:#fff!important}
+.showall-btn{border-radius:0!important;border:3px solid var(--ink)!important;box-shadow:3px 3px 0 rgba(0,0,0,.15)!important;font-weight:700!important;font-size:14px!important;padding:8px 20px!important;background:var(--accent)!important;color:#fff!important}
+.bottom-nav{border-top:4px solid var(--ink)!important;border-radius:0!important}
+.guide-result-item{border-radius:0!important;border:3px solid var(--ink)!important;box-shadow:3px 3px 0 rgba(0,0,0,.15)!important}
+.faq-item{border-radius:0!important;border:3px solid var(--ink)!important;box-shadow:3px 3px 0 rgba(0,0,0,.15)!important;margin-bottom:10px!important}
+.tool-card{border-radius:0!important;border:3px solid var(--ink)!important;box-shadow:3px 3px 0 rgba(0,0,0,.15)!important}
+.help-section h2{font-size:16px!important;padding-left:4px;border-left:4px solid var(--ink)}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-logo"><span>药品搜索</span></div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="location.href='Medical.html'" title="返回"><img src="../Icons/Misc/Return_btn.PNG" alt="返回" class="nav-btn-icon"></button>
+  </div>
+</nav>
+
+<div class="page active" id="page-home">
+  <div class="search-section">
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-bar" id="searchBar" placeholder="搜索药品名称、效果、配方..." oninput="handleSearch()">
+    </div>
+  </div>
+  <div id="filterArea"></div>
+  <div class="sort-section" style="padding:0 20px 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <span style="font-size:12px;color:var(--muted)">排序：</span>
+    <button class="sort-btn active" data-sort="default" onclick="changeSort(this)">📋 默认</button>
+    <button class="sort-btn" data-sort="name" onclick="changeSort(this)">🔤 名称</button>
+    <button class="sort-btn" data-sort="cat" onclick="changeSort(this)">🏷️ 分类</button>
+  </div>
+  <div class="results-section">
+    <div class="results-header">
+      <span class="results-title">📋 化学药品列表</span>
+      <span class="results-count" id="resultCount">0 种</span>
+    </div>
+    <div id="resultsArea"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-item active" data-page="home"><span class="nav-icon">💊</span><span class="nav-label">药品</span></button>
+</nav>
+
+<script src="temp_chemistry.js"></script>
+<script>
+(function(){
+var selCats={},selEffects={},selDangers={},selTemps={},sortMode='default',searchQuery='';
+
+function initFilters(){var c=document.getElementById('filterArea');var h='';FILTER_GROUPS.forEach(function(g){h+='<div class="ingredient-section"><div class="section-header" onclick="this.parentElement.classList.toggle(\'collapsed\')"><span class="section-title"><span class="emoji">'+g.icon+'</span>'+g.title+'<span class="section-toggle">▼</span></span></div><div class="tag-container">';g.options.forEach(function(o){h+='<span class="tag '+g.cssClass+'" data-key="'+g.key+'" data-id="'+o.id+'" onclick="toggleTag(this)">'+o.n+'</span>';});h+='</div></div>';});c.innerHTML=h;}
+
+window.toggleTag=function(el){el.classList.toggle('active');var key=el.dataset.key,id=el.dataset.id;var map=key==='cat'?selCats:key==='effect'?selEffects:key==='danger'?selDangers:selTemps;if(map[id])delete map[id];else map[id]=true;handleSearch();};
+
+window.changeSort=function(btn){document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');sortMode=btn.dataset.sort;handleSearch();};
+
+window.handleSearch=function(){searchQuery=document.getElementById('searchBar').value.trim().toLowerCase();renderResults();};
+
+function filterAll(){var ck=Object.keys(selCats),ek=Object.keys(selEffects),dk=Object.keys(selDangers),tk=Object.keys(selTemps);return CHEMICALS.filter(function(ch){if(ck.length>0&&ck.indexOf(ch.cat)===-1)return false;if(ek.length>0&&!ek.some(function(e){return(ch.effects||[]).some(function(fx){return fx.indexOf(e)!==-1;});}))return false;if(dk.length>0&&!dk.some(function(d){return(ch.tags||[]).indexOf(d)!==-1;}))return false;if(tk.length>0){var hasTemp=false;if(tk.indexOf('冷反应')!==-1&&ch.recipe&&ch.recipe.temp&&ch.recipe.temp.indexOf('冷')!==-1)hasTemp=true;if(tk.indexOf('常温')!==-1&&ch.recipe&&ch.recipe.temp&&ch.recipe.temp.indexOf('常温')!==-1)hasTemp=true;if(tk.indexOf('高温')!==-1&&ch.recipe&&ch.recipe.temp&&ch.recipe.temp.indexOf('高温')!==-1)hasTemp=true;if(tk.indexOf('极高温')!==-1&&ch.recipe&&ch.recipe.temp&&ch.recipe.temp.indexOf('600')!==-1)hasTemp=true;if(tk.indexOf('窄温区')!==-1&&ch.recipe&&ch.recipe.temp&&ch.recipe.temp.indexOf('-')!==-1&&ch.recipe.temp.indexOf('+')!==-1)hasTemp=true;if(!hasTemp)return false;}if(searchQuery){var q=searchQuery;var nm=ch.n.toLowerCase().indexOf(q)!==-1||ch.en.toLowerCase().indexOf(q)!==-1;var ef=(ch.effects||[]).some(function(fx){return fx.toLowerCase().indexOf(q)!==-1;});var ds=ch.desc?ch.desc.toLowerCase().indexOf(q)!==-1:false;if(!nm&&!ef&&!ds)return false;}return true;});}
+
+function renderResults(){var rs=filterAll();if(sortMode==='name')rs.sort(function(a,b){return a.n.localeCompare(b.n);});else if(sortMode==='cat')rs.sort(function(a,b){return a.cat.localeCompare(b.cat);});document.getElementById('resultCount').textContent=rs.length+' 种';var c=document.getElementById('resultsArea');if(rs.length===0){c.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>没有找到匹配的药品</p></div>';return;}var h='';rs.forEach(function(ch){var catLabel=CAT_LABELS[ch.cat]||{name:ch.cat,badge:'badge-cat-other'};var catBadge='<span class="badge '+catLabel.badge+'">'+catLabel.icon+' '+catLabel.name+'</span>';var effectBadges=(ch.effects||[]).slice(0,4).map(function(fx){return'<span class="badge badge-effect">'+fx+'</span>';}).join('');var dangerBadges=(ch.tags||[]).slice(0,3).map(function(t){return'<span class="badge badge-danger">'+t+'</span>';}).join('');var recipeHtml='';if(ch.recipe){var ingList=ch.recipe.r.map(function(ing){return'<span class="reagent-amount">'+ing[1]+' '+ing[0]+'</span>';}).join(' + ');recipeHtml='<div class="recipe-block"><div class="recipe-row"><span class="recipe-arrow">⚗️ '+ingList+'</span></div>';if(ch.recipe.temp)recipeHtml+='<span class="recipe-temp">🌡️ '+ch.recipe.temp+'</span>';if(ch.recipe.ph_range)recipeHtml+='<span class="recipe-ph">⚖️ pH:'+ch.recipe.ph_range+'</span>';if(ch.recipe.note)recipeHtml+='<div class="recipe-note">'+ch.recipe.note+'</div>';recipeHtml+='</div>';}var metaText=ch.od>0?'<span>⚠️ OD:'+ch.od+'u</span>':'';metaText+=ch.meta?'<span>⏱️ 代谢:'+ch.meta+'u/tick</span>':'';h+='<div class="chem-card" onclick="this.classList.toggle(\'expanded\')"><div class="chem-card-header"><div class="chem-name"><span class="chem-color-dot" style="background:'+(ch.color||'#fff')+'"></span>'+ch.n+'<span class="name-en">'+ch.en+'</span></div><span class="expand-indicator">▼</span></div><div class="chem-badges" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">'+catBadge+effectBadges+dangerBadges+'</div><div class="chem-info">'+metaText+'</div><div class="chem-desc">'+(ch.desc||'')+'</div><div class="chem-detail"><div class="detail-row"><span class="detail-label">英文名</span><span class="detail-value">'+ch.en+'</span></div>'+(ch.recipe?'<div class="detail-row"><span class="detail-label">合成配方</span><span class="detail-value">'+recipeHtml+'</span></div>':'')+'<div class="detail-row"><span class="detail-label">全部效果</span><span class="detail-value">'+(ch.effects||[]).map(function(fx){return'<span class="badge badge-effect">'+fx+'</span>';}).join(' ')+'</span></div></div></div>';});c.innerHTML=h;}
+
+initFilters();handleSearch();
+})();
+</script>
+</body>
+</html>
